@@ -9,16 +9,20 @@
   <title>トランプカードドロー</title>
 
   <style>
-    /* ページ全体 */
+
+    /* ============================
+       ページ全体
+       ============================ */
+
     body {
       font-family: sans-serif;
       text-align: center;
       margin: 0;
       padding: 20px;
       background: #f5f5f5;
+      overflow-x: hidden;
     }
 
-    /* タイトル */
     h1 {
       margin-bottom: 10px;
     }
@@ -29,15 +33,24 @@
       margin-bottom: 20px;
     }
 
-    /* カードを置く場所 */
+
+    /* ============================
+       カードを置く場所
+       ============================ */
+
     #card-area {
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 260px;
+      position: relative;
     }
 
-    /* 大きなカード */
+
+    /* ============================
+       大きなカード
+       ============================ */
+
     .card {
       width: 160px;
       height: 230px;
@@ -50,13 +63,18 @@
       cursor: pointer;
       user-select: none;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 5;
     }
 
-    /* 裏面 */
+
+    /* ============================
+       カードの裏面
+       ============================ */
+
     .back {
       background-color: #c62828;
 
-      /* シンプルな模様 */
       background-image:
         repeating-linear-gradient(
           45deg,
@@ -70,7 +88,11 @@
       outline: 3px solid #c62828;
     }
 
-    /* 表面 */
+
+    /* ============================
+       カードの表面
+       ============================ */
+
     .front {
       background-color: white;
       border: 2px solid #333;
@@ -81,7 +103,141 @@
       color: red;
     }
 
-    /* ボタン */
+
+    /* ============================
+       カードが下へ移動するアニメーション
+       ============================ */
+
+    .move-to-history {
+      animation: moveDown 0.45s ease-in forwards;
+    }
+
+    @keyframes moveDown {
+
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(180px) scale(0.35);
+        opacity: 0;
+      }
+
+    }
+
+
+    /* ============================
+       シャッフル時のカード
+       ============================ */
+
+    .shuffle-stack {
+      position: absolute;
+      width: 160px;
+      height: 230px;
+      pointer-events: none;
+    }
+
+    /* シャッフル用の複数カード */
+    .shuffle-card {
+      position: absolute;
+      width: 160px;
+      height: 230px;
+      border-radius: 12px;
+
+      background-color: #c62828;
+
+      background-image:
+        repeating-linear-gradient(
+          45deg,
+          rgba(255,255,255,0.15) 0px,
+          rgba(255,255,255,0.15) 2px,
+          transparent 2px,
+          transparent 8px
+        );
+
+      border: 5px solid white;
+      outline: 2px solid #c62828;
+
+      box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+    }
+
+
+    /* シャッフルカードを左右に動かす */
+    .shuffle-1 {
+      animation: shuffleLeft 0.5s ease;
+    }
+
+    .shuffle-2 {
+      animation: shuffleRight 0.5s ease;
+    }
+
+    .shuffle-3 {
+      animation: shuffleMiddle 0.5s ease;
+    }
+
+    @keyframes shuffleLeft {
+
+      0% {
+        transform: translateX(0) rotate(0deg);
+        opacity: 1;
+      }
+
+      50% {
+        transform: translateX(-45px) rotate(-7deg);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateX(0) rotate(0deg);
+        opacity: 0;
+      }
+
+    }
+
+    @keyframes shuffleRight {
+
+      0% {
+        transform: translateX(0) rotate(0deg);
+        opacity: 1;
+      }
+
+      50% {
+        transform: translateX(45px) rotate(7deg);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateX(0) rotate(0deg);
+        opacity: 0;
+      }
+
+    }
+
+    @keyframes shuffleMiddle {
+
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+
+      50% {
+        transform: translateY(-20px) rotate(2deg);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+      }
+
+    }
+
+
+    /* ============================
+       ボタン
+       ============================ */
+
     button {
       font-size: 18px;
       padding: 10px 20px;
@@ -91,28 +247,30 @@
       cursor: pointer;
     }
 
-    /* ボタンを押したとき */
     button:active {
       transform: scale(0.97);
     }
 
-    /* 履歴エリア */
+
+    /* ============================
+       履歴エリア
+       ============================ */
+
     #history-area {
       margin-top: 30px;
     }
 
-    /* 履歴タイトル */
     #history-area h2 {
       font-size: 20px;
     }
 
-    /* 履歴カードを横並びにする */
     #history {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 8px;
     }
+
 
     /* 小さい履歴カード */
     .history-card {
@@ -121,42 +279,41 @@
       background-color: white;
       border: 1px solid #333;
       border-radius: 5px;
+
       display: flex;
       justify-content: center;
       align-items: center;
+
       font-size: 16px;
       font-weight: bold;
+
+      /* 履歴に追加されたときのアニメーション */
+      animation: historyAppear 0.3s ease;
     }
 
-    /* 履歴の赤いカード */
+    @keyframes historyAppear {
+
+      0% {
+        transform: translateY(-15px) scale(0.7);
+        opacity: 0;
+      }
+
+      100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+
+    }
+
     .history-card.red {
       color: red;
     }
 
-    /* シャッフル時の軽いアニメーション */
-    .shuffle-animation {
-      animation: shuffle 0.35s ease;
-    }
 
-    @keyframes shuffle {
-      0% {
-        transform: rotate(0deg);
-      }
+    /* ============================
+       バージョン番号
+       ============================ */
 
-      30% {
-        transform: rotate(-5deg) translateX(-5px);
-      }
-
-      60% {
-        transform: rotate(5deg) translateX(5px);
-      }
-
-      100% {
-        transform: rotate(0deg);
-      }
-    }
-
-    /* 画面右下のバージョン番号 */
     #version {
       position: fixed;
       right: 8px;
@@ -164,8 +321,10 @@
       font-size: 12px;
       color: #888;
     }
+
   </style>
 </head>
+
 
 <body>
 
@@ -175,8 +334,10 @@
   <!-- 残り枚数 -->
   <div id="remaining">残り：52枚</div>
 
+
   <!-- 大きなカードを表示する場所 -->
   <div id="card-area"></div>
+
 
   <!-- 操作ボタン -->
   <div>
@@ -184,28 +345,30 @@
     <button id="reset-button">リセット</button>
   </div>
 
+
   <!-- 引いたカードの履歴 -->
   <div id="history-area">
+
     <h2>引いたカード</h2>
+
     <div id="history"></div>
+
   </div>
 
+
   <!-- バージョン番号 -->
-  <div id="version">v1.2</div>
+  <div id="version">v1.3</div>
 
 
   <script>
 
-    /*
-      ============================
-      トランプのデータ
-      ============================
-    */
 
-    // マーク
+    /* ============================
+       トランプのデータ
+       ============================ */
+
     const suits = ["♠", "♥", "♦", "♣"];
 
-    // 数字・絵札
     const ranks = [
       "A",
       "2",
@@ -223,76 +386,62 @@
     ];
 
 
-    /*
-      ============================
-      トランプ52枚を作る
-      ============================
-    */
+    /* ============================
+       52枚のカードを作る
+       ============================ */
 
     function createDeck() {
 
       const newDeck = [];
 
-      // 4種類のマークを順番に処理
       for (let suit of suits) {
 
-        // A〜Kを順番に処理
         for (let rank of ranks) {
 
-          // 1枚のカードを作る
           newDeck.push({
             suit: suit,
             rank: rank
           });
 
         }
+
       }
 
       return newDeck;
     }
 
 
-    /*
-      ============================
-      カードをシャッフルする
-      ============================
-    */
+    /* ============================
+       カードをシャッフル
+       ============================ */
 
     function shuffleDeck(deck) {
 
-      // Fisher-Yates方式でシャッフル
       for (let i = deck.length - 1; i > 0; i--) {
 
         const j = Math.floor(Math.random() * (i + 1));
 
-        // カードを入れ替える
         [deck[i], deck[j]] = [deck[j], deck[i]];
+
       }
 
     }
 
 
-    /*
-      ============================
-      アプリで使う変数
-      ============================
-    */
+    /* ============================
+       アプリの状態
+       ============================ */
 
-    // 残っているカード
     let deck = [];
 
-    // 現在表示しているカード
     let currentCard = null;
 
-    // 現在のカードが表になっているか
     let revealed = false;
 
 
-    /*
-      ============================
-      残り枚数を画面に表示
-      ============================
-    */
+    /* ============================
+       残り枚数を更新
+       ============================ */
 
     function updateRemaining() {
 
@@ -302,261 +451,353 @@
     }
 
 
-    /*
-      ============================
-      裏向きカードを表示
-      ============================
-    */
+    /* ============================
+       裏向きカードを表示
+       ============================ */
 
     function showBackCard() {
 
-      // カード表示エリアを空にする
       const cardArea = document.getElementById("card-area");
+
       cardArea.innerHTML = "";
 
-      // 山札の一番上のカードを「現在のカード」にする
       currentCard = deck[0];
 
-      // まだ表になっていない
       revealed = false;
 
-      // 裏向きカードを作る
+
       const cardElement = document.createElement("div");
 
       cardElement.className = "card back";
 
-      // カードをタップしたら表にする
-      cardElement.addEventListener("click", handleCardClick);
+      cardElement.addEventListener(
+        "click",
+        handleCardClick
+      );
 
-      // 画面に表示
       cardArea.appendChild(cardElement);
+
     }
 
 
-    /*
-      ============================
-      カードをタップしたとき
-      ============================
-      
-      1回目：
-      裏 → 表
-      
-      2回目：
-      表 → 履歴へ移動 → 次のカード
-    */
+    /* ============================
+       カードをタップ
+       ============================ */
 
     function handleCardClick() {
 
-      // カードが存在しない場合は何もしない
       if (!currentCard) {
         return;
       }
 
 
-      /*
-        1回目のタップ
-        ↓
-        カードを表にする
-      */
+      /* ----------------------------
+         1回目のタップ
+         裏面 → 表面
+         ---------------------------- */
 
       if (!revealed) {
 
         revealed = true;
 
-        const cardArea = document.getElementById("card-area");
+        const cardArea =
+          document.getElementById("card-area");
 
-        // 表面のカードを作る
-        const cardElement = document.createElement("div");
+        const cardElement =
+          document.createElement("div");
 
-        cardElement.className = "card front";
+        cardElement.className =
+          "card front";
 
-        // ハート・ダイヤなら赤色
+
         if (
           currentCard.suit === "♥" ||
           currentCard.suit === "♦"
         ) {
+
           cardElement.classList.add("red");
+
         }
 
-        // カードの文字
+
         cardElement.textContent =
           currentCard.suit + " " + currentCard.rank;
 
-        // カード表示を入れ替える
+
         cardArea.innerHTML = "";
 
         cardArea.appendChild(cardElement);
 
-        // もう一度タップできるようにする
-        cardElement.addEventListener("click", handleCardClick);
+
+        /* 表面をもう一度タップできるようにする */
+        cardElement.addEventListener(
+          "click",
+          handleCardClick
+        );
 
         return;
       }
 
 
-      /*
-        2回目のタップ
-        ↓
-        今のカードを確定して履歴へ
-      */
+      /* ----------------------------
+         2回目のタップ
+         表面 → 下へ移動
+         ---------------------------- */
 
-      // 山札から現在のカードを取り除く
-      deck.shift();
-
-      // 履歴に追加
-      addToHistory(currentCard);
-
-      // 残り枚数を更新
-      updateRemaining();
+      const cardElement =
+        document.querySelector(".front");
 
 
-      /*
-        まだカードが残っている場合
-        ↓
-        次の裏向きカードを表示
-      */
+      if (cardElement) {
 
-      if (deck.length > 0) {
+        /*
+          カードを下へ移動させる
+        */
+        cardElement.classList.add(
+          "move-to-history"
+        );
 
-        showBackCard();
-
-      } else {
-
-        // 52枚すべて引き終わった場合
-        currentCard = null;
-
-        document.getElementById("card-area").innerHTML =
-          "<p>すべてのカードを引きました！</p>";
       }
+
+
+      /*
+        アニメーションが終わってから
+        履歴に追加して次のカードを出す
+      */
+
+      setTimeout(function() {
+
+        /* 山札からカードを取り除く */
+        deck.shift();
+
+        /* 履歴に追加 */
+        addToHistory(currentCard);
+
+        /* 枚数更新 */
+        updateRemaining();
+
+
+        /* 次のカード */
+        if (deck.length > 0) {
+
+          showBackCard();
+
+        } else {
+
+          currentCard = null;
+
+          document.getElementById(
+            "card-area"
+          ).innerHTML =
+            "<p>すべてのカードを引きました！</p>";
+
+        }
+
+      }, 450);
 
     }
 
 
-    /*
-      ============================
-      引いたカードを履歴に追加
-      ============================
-    */
+    /* ============================
+       履歴にカードを追加
+       ============================ */
 
     function addToHistory(card) {
 
-      const history = document.getElementById("history");
+      const history =
+        document.getElementById("history");
 
-      // 小さいカードを作る
-      const historyCard = document.createElement("div");
 
-      historyCard.className = "history-card";
+      const historyCard =
+        document.createElement("div");
 
-      // ハート・ダイヤは赤色
+
+      historyCard.className =
+        "history-card";
+
+
       if (
         card.suit === "♥" ||
         card.suit === "♦"
       ) {
+
         historyCard.classList.add("red");
+
       }
 
-      // カードの文字
+
       historyCard.textContent =
         card.suit + card.rank;
 
-      // 履歴の最後に追加
+
       history.appendChild(historyCard);
 
     }
 
 
-    /*
-      ============================
-      シャッフルボタン
-      ============================
-      
-      ポイント：
-      カードを引かない。
-      そのため残り枚数は減らない。
-    */
+    /* ============================
+       シャッフル演出
+       ============================ */
+
+    function showShuffleAnimation() {
+
+      const cardArea =
+        document.getElementById("card-area");
+
+
+      /*
+        シャッフル用のカードを
+        3枚重ねて作る
+      */
+
+      const stack =
+        document.createElement("div");
+
+      stack.className =
+        "shuffle-stack";
+
+
+      /* 1枚目 */
+      const card1 =
+        document.createElement("div");
+
+      card1.className =
+        "shuffle-card shuffle-1";
+
+
+      /* 2枚目 */
+      const card2 =
+        document.createElement("div");
+
+      card2.className =
+        "shuffle-card shuffle-2";
+
+
+      /* 3枚目 */
+      const card3 =
+        document.createElement("div");
+
+      card3.className =
+        "shuffle-card shuffle-3";
+
+
+      stack.appendChild(card1);
+      stack.appendChild(card2);
+      stack.appendChild(card3);
+
+
+      cardArea.appendChild(stack);
+
+
+      /*
+        アニメーション終了後に
+        演出用カードを削除
+      */
+
+      setTimeout(function() {
+
+        stack.remove();
+
+      }, 550);
+
+    }
+
+
+    /* ============================
+       シャッフルボタン
+       ============================ */
 
     document
       .getElementById("shuffle-button")
       .addEventListener("click", function() {
 
-        // 残っているカードだけをシャッフル
-        shuffleDeck(deck);
 
         /*
-          裏向きカードが表示されているときは、
-          シャッフル後の一番上のカードに変更する。
+          残っているカードだけを
+          シャッフルする
+        */
+
+        shuffleDeck(deck);
+
+
+        /*
+          カードをまだ表にしていない場合は
+          一番上のカードを変更する
         */
 
         if (!revealed && deck.length > 0) {
 
           showBackCard();
 
-          // 軽いアニメーションを付ける
-          const card = document.querySelector(".card");
-
-          if (card) {
-            card.classList.add("shuffle-animation");
-          }
-
         }
 
-        // 表向きのカードが表示中なら、
-        // そのカードはそのまま残す。
-        // シャッフルするのは残りの山札だけ。
+
+        /*
+          複数枚のカードが動く
+          シャッフル演出
+        */
+
+        showShuffleAnimation();
+
+
+        /*
+          シャッフルではカードを引かないので
+          枚数は減らない
+        */
 
         updateRemaining();
 
       });
 
 
-    /*
-      ============================
-      リセットボタン
-      ============================
-    */
+    /* ============================
+       リセットボタン
+       ============================ */
 
     document
       .getElementById("reset-button")
       .addEventListener("click", function() {
 
-        // 52枚の新しいデッキを作る
+
+        /* 新しい52枚を作る */
         deck = createDeck();
 
-        // シャッフル
+
+        /* シャッフル */
         shuffleDeck(deck);
 
-        // 現在のカードをリセット
+
+        /* 状態をリセット */
         currentCard = null;
         revealed = false;
 
-        // 履歴を消す
-        document.getElementById("history").innerHTML = "";
 
-        // 残り枚数を更新
+        /* 履歴を消す */
+        document.getElementById(
+          "history"
+        ).innerHTML = "";
+
+
+        /* 枚数を更新 */
         updateRemaining();
 
-        // 新しい裏向きカードを表示
+
+        /* 新しい裏向きカード */
         showBackCard();
 
       });
 
 
-    /*
-      ============================
-      アプリ開始時の処理
-      ============================
-    */
+    /* ============================
+       アプリ開始
+       ============================ */
 
-    // 52枚のデッキを作る
     deck = createDeck();
 
-    // 最初にシャッフル
     shuffleDeck(deck);
 
-    // 残り枚数を表示
     updateRemaining();
 
-    // 最初の裏向きカードを表示
     showBackCard();
 
   </script>
