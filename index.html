@@ -1,26 +1,21 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
   <meta charset="UTF-8">
 
   <!-- スマホ画面に合わせて表示する設定 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>トランプを引こう</title>
+  <title>トランプカード</title>
 
   <style>
-    /* ==================================================
-       CSS：画面の見た目を担当するプログラム
-       ================================================== */
-
-    /* ページ全体の基本設定 */
+    /* ページ全体 */
     body {
       margin: 0;
       padding: 20px;
-      background: #f5f5f5;
       font-family: sans-serif;
       text-align: center;
+      background: #f2f2f2;
     }
 
     /* タイトル */
@@ -28,370 +23,458 @@
       margin-bottom: 10px;
     }
 
-    /* 残り枚数の表示 */
+    /* 残り枚数 */
     #remaining {
       margin-bottom: 20px;
       font-size: 18px;
-      font-weight: bold;
     }
 
     /* カードを置く場所 */
-    #cardArea {
+    #card-area {
       display: flex;
       justify-content: center;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
     }
 
-    /* ==================================================
-       トランプ本体
-       ================================================== */
-
+    /*
+      カード本体
+      表面・裏面の両方で使う
+    */
     .card {
-      width: 160px;
-      height: 230px;
+      width: 180px;
+      height: 260px;
+      border-radius: 14px;
+      cursor: pointer;
+      user-select: none;
 
-      /* カードの角を丸くする */
-      border-radius: 15px;
+      /* カードを少し浮かせる */
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
 
-      /* カードの影 */
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-
-      /* カードを中央に表示 */
       display: flex;
       justify-content: center;
       align-items: center;
 
-      /* タップしたときに指で押しやすくする */
-      cursor: pointer;
-
-      /* 文字を大きくする */
-      font-size: 100px;
-
-      /* タップ時の動きを少し滑らかにする */
-      transition: transform 0.2s;
+      font-size: 70px;
+      font-weight: bold;
     }
 
-    /* カードを押したときに少し縮む */
-    .card:active {
-      transform: scale(0.95);
-    }
+    /*
+      裏面
 
-    /* ==================================================
-       カードの裏側
-       ================================================== */
-
+      ジョーカーなどの特殊文字は使わず、
+      CSSだけでトランプの裏面を作る
+    */
     .back {
-      background: #333;
-      color: white;
+      background-color: #b00020;
+
+      /*
+        細かい格子模様を作る
+      */
+      background-image:
+        repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 8px,
+          rgba(255,255,255,0.35) 8px,
+          rgba(255,255,255,0.35) 10px
+        ),
+        repeating-linear-gradient(
+          -45deg,
+          transparent,
+          transparent 8px,
+          rgba(255,255,255,0.35) 8px,
+          rgba(255,255,255,0.35) 10px
+        );
+
+      /*
+        白い枠線
+      */
+      border: 8px solid white;
+
+      /*
+        枠の内側にも白い線を入れる
+      */
+      box-sizing: border-box;
     }
 
-    /* カードの表側 */
+    /*
+      表面
+    */
     .front {
       background: white;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      color: black;
     }
 
-    /* ==================================================
-       ボタン
-       ================================================== */
+    /*
+      ハートとダイヤは赤色
+    */
+    .red {
+      color: #d00000;
+    }
 
+    /*
+      ボタン
+    */
     button {
       font-size: 18px;
       padding: 12px 20px;
       margin: 5px;
-
       border: none;
       border-radius: 8px;
-
       cursor: pointer;
+    }
+
+    /*
+      シャッフルボタン
+    */
+    #shuffle-button {
+      background: #333;
+      color: white;
+    }
+
+    /*
+      リセットボタン
+    */
+    #reset-button {
+      background: #ddd;
+      color: #111;
+    }
+
+    /*
+      スマホで押しやすいようにする
+    */
+    button:active {
+      transform: scale(0.96);
     }
   </style>
 </head>
 
-
 <body>
 
-  <!-- ==================================================
-       HTML：画面に表示する部品
-       ================================================== -->
+  <h1>トランプカード</h1>
 
-  <h1>トランプを引こう</h1>
+  <!-- 残りのカード枚数を表示 -->
+  <div id="remaining">
+    残り：52枚
+  </div>
 
-  <!-- 残り枚数を表示する場所 -->
-  <div id="remaining">残り 52 枚</div>
+  <!-- カードを表示する場所 -->
+  <div id="card-area"></div>
 
-  <!-- トランプを表示する場所 -->
-  <div id="cardArea"></div>
-
-  <!-- ボタン -->
-  <button id="shuffleButton">シャッフル</button>
-  <button id="resetButton">リセット</button>
+  <!-- 操作ボタン -->
+  <div>
+    <button id="shuffle-button">シャッフル</button>
+    <button id="reset-button">リセット</button>
+  </div>
 
 
   <script>
-    /* ==================================================
-       JavaScript：ゲームの動きを担当するプログラム
-       ================================================== */
-
-
-    /* --------------------------------------------------
-       ① 52枚のトランプを作る
-       -------------------------------------------------- */
-
-    // トランプのマーク
-    const suits = ["🂠", "🂱", "🃁", "🃑"];
 
     /*
-      上の記号はトランプのUnicode文字です。
-
-      今回は画像を使わず、
-      コンピューターに用意されている
-      トランプ専用の文字を使います。
+      ========================================
+      ① トランプを作る
+      ========================================
     */
 
+    // 4種類のマーク
+    const suits = ["♠", "♥", "♦", "♣"];
 
-    // 52枚のカードを入れる配列
-    let deck = [];
+    // 13種類の数字・記号
+    const ranks = [
+      "A", "2", "3", "4", "5", "6", "7",
+      "8", "9", "10", "J", "Q", "K"
+    ];
 
 
-    // すでに引いたカードを記録する配列
-    let drawnCards = [];
+    /*
+      トランプ全52枚を作る
 
+      例えば、
 
-    /* --------------------------------------------------
-       ② 52枚のカードを作る関数
-       -------------------------------------------------- */
+      ♠A
+      ♠2
+      ♠3
+      ...
+      ♥A
+      ♥2
+      ...
 
+      という52枚のカードを作る
+    */
     function createDeck() {
 
-      // いったん空にする
-      deck = [];
+      const newDeck = [];
 
-      // A～Kの13種類
-      const ranks = [
-        "A", "2", "3", "4", "5", "6", "7",
-        "8", "9", "10", "J", "Q", "K"
-      ];
+      for (const suit of suits) {
 
-      /*
-        マーク4種類 × 数字13種類
-        = 52枚
-      */
+        for (const rank of ranks) {
 
-      for (let suit = 0; suit < suits.length; suit++) {
-
-        for (let rank = 0; rank < ranks.length; rank++) {
-
-          // 1枚のカードを作る
-          deck.push({
+          newDeck.push({
             suit: suit,
-            rank: ranks[rank]
+            rank: rank
           });
 
         }
       }
+
+      return newDeck;
     }
 
 
-    /* --------------------------------------------------
-       ③ カードをシャッフルする関数
-       -------------------------------------------------- */
+    /*
+      ========================================
+      ② カードをシャッフルする
+      ========================================
+    */
 
-    function shuffleDeck() {
+    function shuffleDeck(deck) {
 
       /*
-        Fisher-Yatesという方法で
-        カードの順番をランダムにします。
+        Fisher-Yates法という方法で
+        カードの順番をランダムにする
       */
 
       for (let i = deck.length - 1; i > 0; i--) {
 
-        // 0～iの中からランダムな位置を選ぶ
-        const randomIndex = Math.floor(Math.random() * (i + 1));
+        const randomIndex =
+          Math.floor(Math.random() * (i + 1));
 
-        // カードの順番を入れ替える
+        // カードの位置を入れ替える
         [deck[i], deck[randomIndex]] =
           [deck[randomIndex], deck[i]];
       }
+
+      return deck;
     }
 
 
-    /* --------------------------------------------------
-       ④ 残り枚数を画面に表示する
-       -------------------------------------------------- */
+    /*
+      ========================================
+      ③ 変数
+      ========================================
+    */
+
+    // 残っているカード
+    let deck = [];
+
+    // 今表示している裏向きカード
+    let currentCard = null;
+
+    // 表面を表示しているかどうか
+    let revealed = false;
+
+
+    /*
+      ========================================
+      ④ 残り枚数を表示する
+      ========================================
+    */
 
     function updateRemaining() {
 
       document.getElementById("remaining").textContent =
-        "残り " + deck.length + " 枚";
+        "残り：" + deck.length + "枚";
     }
 
 
-    /* --------------------------------------------------
-       ⑤ カードを表示する
-       -------------------------------------------------- */
+    /*
+      ========================================
+      ⑤ カードを表示する
+      ========================================
+    */
 
-    function showCard(card) {
+    function showCard() {
 
-      // カードを置く場所
-      const cardArea = document.getElementById("cardArea");
+      const cardArea =
+        document.getElementById("card-area");
 
-      // 古いカードを消す
+      // 表示されているカードを消す
       cardArea.innerHTML = "";
 
-      // カードのHTMLを作る
-      const cardElement = document.createElement("div");
-
-      // カードのクラスを設定
-      cardElement.className = "card back";
-
-      // 裏向きなので「？」を表示
-      cardElement.textContent = "🂠";
-
-
       /*
-        カードをタップしたら、
-        本物のカードを表示します。
+        残りのカードがなければ終了
       */
-
-      cardElement.addEventListener("click", function () {
-
-        // カードを表側にする
-        cardElement.className = "card front";
-
-        // 実際のカードを表示
-        cardElement.textContent =
-          getCardSymbol(card);
-
-      });
-
-
-      // 画面にカードを追加
-      cardArea.appendChild(cardElement);
-    }
-
-
-    /* --------------------------------------------------
-       ⑥ カードをUnicodeのトランプ記号に変換
-       -------------------------------------------------- */
-
-    function getCardSymbol(card) {
-
-      /*
-        Unicodeにはトランプ専用の文字があります。
-
-        今回はその文字を使って
-        A～Kのカードを表示します。
-      */
-
-      const suitSymbols = ["♠", "♥", "♦", "♣"];
-
-      return suitSymbols[card.suit] + card.rank;
-    }
-
-
-    /* --------------------------------------------------
-       ⑦ 新しいカードを1枚引く
-       -------------------------------------------------- */
-
-    function drawCard() {
-
-      // カードがなくなったら何もしない
       if (deck.length === 0) {
-        alert("カードがありません。リセットしてください。");
+
+        cardArea.textContent =
+          "カードがなくなりました";
+
+        currentCard = null;
+
+        updateRemaining();
+
         return;
       }
 
+
       /*
-        山札の一番上から1枚取り出す。
+        山札から1枚取り出す
 
-        pop()を使うことで、
-        一度引いたカードは山札から消えます。
+        splice(0, 1)なので、
+        取り出したカードは山札から消える。
+
+        これによって同じカードが
+        2回出ることを防ぐ。
       */
+      currentCard = deck.splice(0, 1)[0];
 
-      const card = deck.pop();
+      revealed = false;
 
-      // 引いたカードを記録
-      drawnCards.push(card);
 
-      // 最初は裏向きで表示
-      showCard(card);
+      /*
+        裏面のカードを作る
+      */
+      const cardElement =
+        document.createElement("div");
 
-      // 残り枚数を更新
+      cardElement.className =
+        "card back";
+
+
+      /*
+        カードをタップしたら
+        表面を表示する
+      */
+      cardElement.addEventListener(
+        "click",
+        revealCard
+      );
+
+
+      cardArea.appendChild(cardElement);
+
       updateRemaining();
     }
 
 
-    /* --------------------------------------------------
-       ⑧ シャッフルボタン
-       -------------------------------------------------- */
-
-    document.getElementById("shuffleButton")
-      .addEventListener("click", function () {
-
-        /*
-          ここでシャッフルするのは
-          「まだ引いていないカード」だけです。
-
-          すでに引いたカードは
-          deckから消えているので、
-          シャッフル対象には入りません。
-        */
-
-        shuffleDeck();
-
-        // 残り枚数を更新
-        updateRemaining();
-
-        // 新しいカードを裏向きで表示
-        if (deck.length > 0) {
-          showCard(deck[deck.length - 1]);
-        }
-      });
-
-
-    /* --------------------------------------------------
-       ⑨ リセットボタン
-       -------------------------------------------------- */
-
-    document.getElementById("resetButton")
-      .addEventListener("click", function () {
-
-        /*
-          52枚すべてを作り直して、
-          もう一度シャッフルします。
-        */
-
-        createDeck();
-        shuffleDeck();
-
-        // 引いたカードの記録も空にする
-        drawnCards = [];
-
-        // 残り枚数を更新
-        updateRemaining();
-
-        // カード表示を消す
-        document.getElementById("cardArea").innerHTML = "";
-      });
-
-
-    /* --------------------------------------------------
-       ⑩ ページを開いたときの処理
-       -------------------------------------------------- */
-
     /*
-      ページを開くたびに、
-
-      1. 52枚作る
-      2. シャッフルする
-      3. 残り枚数を表示する
-
-      という処理を行います。
+      ========================================
+      ⑥ カードを表にする
+      ========================================
     */
 
-    createDeck();
-    shuffleDeck();
-    updateRemaining();
+    function revealCard() {
+
+      // すでに表になっていたら何もしない
+      if (revealed) {
+        return;
+      }
+
+      revealed = true;
+
+      const cardArea =
+        document.getElementById("card-area");
+
+      /*
+        表示するカードを作る
+      */
+      const cardElement =
+        document.createElement("div");
+
+      cardElement.className =
+        "card front";
+
+
+      /*
+        ハート・ダイヤなら赤色
+      */
+      if (
+        currentCard.suit === "♥" ||
+        currentCard.suit === "♦"
+      ) {
+        cardElement.classList.add("red");
+      }
+
+
+      /*
+        カードのマークと数字を表示
+      */
+      cardElement.textContent =
+        currentCard.suit +
+        " " +
+        currentCard.rank;
+
+
+      /*
+        表示
+      */
+      cardArea.innerHTML = "";
+
+      cardArea.appendChild(cardElement);
+    }
+
+
+    /*
+      ========================================
+      ⑦ シャッフルボタン
+      ========================================
+    */
+
+    document
+      .getElementById("shuffle-button")
+      .addEventListener("click", function() {
+
+        /*
+          残っているカードだけをシャッフルする。
+
+          すでに引いたカードは戻さない。
+        */
+        shuffleDeck(deck);
+
+        /*
+          新しいカードを1枚出す
+        */
+        showCard();
+      });
+
+
+    /*
+      ========================================
+      ⑧ リセットボタン
+      ========================================
+    */
+
+    document
+      .getElementById("reset-button")
+      .addEventListener("click", function() {
+
+        /*
+          52枚すべてを作り直す
+        */
+        deck = createDeck();
+
+        /*
+          52枚をシャッフル
+        */
+        shuffleDeck(deck);
+
+        /*
+          新しいカードを表示
+        */
+        showCard();
+      });
+
+
+    /*
+      ========================================
+      ⑨ 最初に実行
+      ========================================
+    */
+
+    /*
+      ページを開いた時点で
+      52枚を作ってシャッフルする
+    */
+    deck = createDeck();
+
+    shuffleDeck(deck);
+
+    /*
+      最初のカードを裏向きで表示
+    */
+    showCard();
 
   </script>
 
