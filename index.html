@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
 
-  <!-- スマホ画面に合わせて表示する設定 -->
+  <!-- スマホ画面に合わせる -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>トランプカード</title>
 
   <style>
+
     /* ページ全体 */
     body {
       margin: 0;
@@ -36,10 +37,7 @@
       margin-bottom: 20px;
     }
 
-    /*
-      カード本体
-      表面・裏面の両方で使う
-    */
+    /* トランプ本体 */
     .card {
       width: 180px;
       height: 260px;
@@ -47,7 +45,6 @@
       cursor: pointer;
       user-select: none;
 
-      /* カードを少し浮かせる */
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
 
       display: flex;
@@ -62,14 +59,11 @@
       裏面
 
       ジョーカーなどの特殊文字は使わず、
-      CSSだけでトランプの裏面を作る
+      CSSでトランプらしい模様を作る
     */
     .back {
       background-color: #b00020;
 
-      /*
-        細かい格子模様を作る
-      */
       background-image:
         repeating-linear-gradient(
           45deg,
@@ -86,20 +80,11 @@
           rgba(255,255,255,0.35) 10px
         );
 
-      /*
-        白い枠線
-      */
       border: 8px solid white;
-
-      /*
-        枠の内側にも白い線を入れる
-      */
       box-sizing: border-box;
     }
 
-    /*
-      表面
-    */
+    /* 表面 */
     .front {
       background: white;
       border: 1px solid #ccc;
@@ -107,16 +92,12 @@
       color: black;
     }
 
-    /*
-      ハートとダイヤは赤色
-    */
+    /* ハート・ダイヤ */
     .red {
       color: #d00000;
     }
 
-    /*
-      ボタン
-    */
+    /* ボタン */
     button {
       font-size: 18px;
       padding: 12px 20px;
@@ -126,47 +107,106 @@
       cursor: pointer;
     }
 
-    /*
-      シャッフルボタン
-    */
+    /* シャッフルボタン */
     #shuffle-button {
       background: #333;
       color: white;
     }
 
-    /*
-      リセットボタン
-    */
+    /* リセットボタン */
     #reset-button {
       background: #ddd;
       color: #111;
     }
 
-    /*
-      スマホで押しやすいようにする
-    */
+    /* ボタンを押したとき */
     button:active {
       transform: scale(0.96);
     }
+
+    /*
+      引いたカード一覧
+    */
+    #history-area {
+      margin: 30px auto 0;
+      max-width: 500px;
+      text-align: left;
+    }
+
+    /* 一覧のタイトル */
+    #history-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    /*
+      引いたカードを並べる場所
+    */
+    #history {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /*
+      引いたカード1枚分
+
+      大きなカードではなく、
+      小さく表示する
+    */
+    .history-card {
+      width: 42px;
+      height: 58px;
+
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      font-size: 18px;
+      font-weight: bold;
+
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+
   </style>
 </head>
+
 
 <body>
 
   <h1>トランプカード</h1>
 
-  <!-- 残りのカード枚数を表示 -->
+  <!-- 残り枚数 -->
   <div id="remaining">
     残り：52枚
   </div>
 
-  <!-- カードを表示する場所 -->
+  <!-- 現在のカード -->
   <div id="card-area"></div>
 
-  <!-- 操作ボタン -->
+  <!-- ボタン -->
   <div>
     <button id="shuffle-button">シャッフル</button>
     <button id="reset-button">リセット</button>
+  </div>
+
+
+  <!--
+    引いたカードの一覧
+  -->
+  <div id="history-area">
+
+    <div id="history-title">
+      引いたカード
+    </div>
+
+    <div id="history"></div>
+
   </div>
 
 
@@ -181,7 +221,7 @@
     // 4種類のマーク
     const suits = ["♠", "♥", "♦", "♣"];
 
-    // 13種類の数字・記号
+    // 13種類
     const ranks = [
       "A", "2", "3", "4", "5", "6", "7",
       "8", "9", "10", "J", "Q", "K"
@@ -189,19 +229,7 @@
 
 
     /*
-      トランプ全52枚を作る
-
-      例えば、
-
-      ♠A
-      ♠2
-      ♠3
-      ...
-      ♥A
-      ♥2
-      ...
-
-      という52枚のカードを作る
+      52枚のカードを作る
     */
     function createDeck() {
 
@@ -225,23 +253,21 @@
 
     /*
       ========================================
-      ② カードをシャッフルする
+      ② シャッフル
       ========================================
     */
 
     function shuffleDeck(deck) {
 
       /*
-        Fisher-Yates法という方法で
-        カードの順番をランダムにする
+        残っているカードの順番だけを
+        ランダムに入れ替える
       */
-
       for (let i = deck.length - 1; i > 0; i--) {
 
         const randomIndex =
           Math.floor(Math.random() * (i + 1));
 
-        // カードの位置を入れ替える
         [deck[i], deck[randomIndex]] =
           [deck[randomIndex], deck[i]];
       }
@@ -259,16 +285,20 @@
     // 残っているカード
     let deck = [];
 
-    // 今表示している裏向きカード
+    /*
+      現在表示している裏向きカード
+
+      まだ「引いた」ことにはしない
+    */
     let currentCard = null;
 
-    // 表面を表示しているかどうか
+    // 表になっているか
     let revealed = false;
 
 
     /*
       ========================================
-      ④ 残り枚数を表示する
+      ④ 残り枚数
       ========================================
     */
 
@@ -281,50 +311,33 @@
 
     /*
       ========================================
-      ⑤ カードを表示する
+      ⑤ 裏向きカードを表示
       ========================================
     */
 
-    function showCard() {
+    function showBackCard() {
 
       const cardArea =
         document.getElementById("card-area");
 
-      // 表示されているカードを消す
       cardArea.innerHTML = "";
 
       /*
-        残りのカードがなければ終了
+        重要！
+
+        ここではカードをdeckから取り出さない。
+
+        つまり「シャッフル」しても
+        枚数は減らない。
       */
-      if (deck.length === 0) {
 
-        cardArea.textContent =
-          "カードがなくなりました";
-
-        currentCard = null;
-
-        updateRemaining();
-
-        return;
-      }
-
-
-      /*
-        山札から1枚取り出す
-
-        splice(0, 1)なので、
-        取り出したカードは山札から消える。
-
-        これによって同じカードが
-        2回出ることを防ぐ。
-      */
-      currentCard = deck.splice(0, 1)[0];
+      currentCard = deck[0];
 
       revealed = false;
 
 
       /*
-        裏面のカードを作る
+        裏面を作る
       */
       const cardElement =
         document.createElement("div");
@@ -334,8 +347,7 @@
 
 
       /*
-        カードをタップしたら
-        表面を表示する
+        タップしたら表にする
       */
       cardElement.addEventListener(
         "click",
@@ -344,8 +356,6 @@
 
 
       cardArea.appendChild(cardElement);
-
-      updateRemaining();
     }
 
 
@@ -357,18 +367,28 @@
 
     function revealCard() {
 
-      // すでに表になっていたら何もしない
+      /*
+        すでに表なら何もしない
+      */
       if (revealed) {
         return;
       }
 
       revealed = true;
 
-      const cardArea =
-        document.getElementById("card-area");
 
       /*
-        表示するカードを作る
+        ここで初めて山札から
+        カードを1枚取り出す。
+
+        つまり、この瞬間に
+        残り枚数が1枚減る。
+      */
+      deck.shift();
+
+
+      /*
+        表面を作る
       */
       const cardElement =
         document.createElement("div");
@@ -378,7 +398,7 @@
 
 
       /*
-        ハート・ダイヤなら赤色
+        ハート・ダイヤは赤
       */
       if (
         currentCard.suit === "♥" ||
@@ -389,7 +409,7 @@
 
 
       /*
-        カードのマークと数字を表示
+        カードを表示
       */
       cardElement.textContent =
         currentCard.suit +
@@ -400,15 +420,93 @@
       /*
         表示
       */
+      const cardArea =
+        document.getElementById("card-area");
+
       cardArea.innerHTML = "";
 
       cardArea.appendChild(cardElement);
+
+
+      /*
+        引いたカードを一覧に追加
+      */
+      addToHistory(currentCard);
+
+
+      /*
+        残り枚数を更新
+      */
+      updateRemaining();
+
+
+      /*
+        まだカードが残っていれば、
+        次のカードを裏向きで用意する。
+
+        ただし、すぐに表にはしない。
+      */
+      if (deck.length > 0) {
+
+        setTimeout(function() {
+          showBackCard();
+        }, 300);
+
+      } else {
+
+        currentCard = null;
+
+      }
     }
 
 
     /*
       ========================================
-      ⑦ シャッフルボタン
+      ⑦ 引いたカード一覧に追加
+      ========================================
+    */
+
+    function addToHistory(card) {
+
+      const history =
+        document.getElementById("history");
+
+
+      const historyCard =
+        document.createElement("div");
+
+      historyCard.className =
+        "history-card";
+
+
+      /*
+        ハート・ダイヤは赤
+      */
+      if (
+        card.suit === "♥" ||
+        card.suit === "♦"
+      ) {
+        historyCard.classList.add("red");
+      }
+
+
+      /*
+        小さいカードとして表示
+      */
+      historyCard.textContent =
+        card.suit + card.rank;
+
+
+      /*
+        一覧の最後に追加
+      */
+      history.appendChild(historyCard);
+    }
+
+
+    /*
+      ========================================
+      ⑧ シャッフルボタン
       ========================================
     */
 
@@ -417,22 +515,27 @@
       .addEventListener("click", function() {
 
         /*
-          残っているカードだけをシャッフルする。
+          残りのカードだけをシャッフル。
 
-          すでに引いたカードは戻さない。
+          ここではカードを引かないので、
+          残り枚数は変わらない。
         */
         shuffleDeck(deck);
 
+
         /*
-          新しいカードを1枚出す
+          新しく裏向きカードを表示
         */
-        showCard();
+        if (deck.length > 0) {
+          showBackCard();
+        }
+
       });
 
 
     /*
       ========================================
-      ⑧ リセットボタン
+      ⑨ リセットボタン
       ========================================
     */
 
@@ -441,40 +544,62 @@
       .addEventListener("click", function() {
 
         /*
-          52枚すべてを作り直す
+          52枚に戻す
         */
         deck = createDeck();
+
 
         /*
           52枚をシャッフル
         */
         shuffleDeck(deck);
 
+
         /*
-          新しいカードを表示
+          引いたカード一覧を空にする
         */
-        showCard();
+        document.getElementById("history").innerHTML = "";
+
+
+        /*
+          新しい裏向きカードを表示
+        */
+        showBackCard();
+
+
+        /*
+          残り枚数を52枚にする
+        */
+        updateRemaining();
+
       });
 
 
     /*
       ========================================
-      ⑨ 最初に実行
+      ⑩ ページを開いたとき
       ========================================
     */
 
     /*
-      ページを開いた時点で
-      52枚を作ってシャッフルする
+      52枚を作る
     */
     deck = createDeck();
 
+
+    /*
+      最初にシャッフル
+    */
     shuffleDeck(deck);
+
 
     /*
       最初のカードを裏向きで表示
+
+      ここではまだカードを引いていないので
+      残り枚数は52枚のまま。
     */
-    showCard();
+    showBackCard();
 
   </script>
 
