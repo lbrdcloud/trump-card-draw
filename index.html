@@ -31,27 +31,18 @@
       font-size: 16px;
     }
 
-    /*
-      カードを置く場所
-    */
+    /* カードを置く場所 */
     .card-area {
       position: relative;
-
       width: 160px;
       height: 230px;
-
       margin: 18px auto 8px;
 
-      /*
-        スマホでドラッグしたときに
-        ページ自体がスクロールしないようにする
-      */
+      /* スマホでドラッグしてもページが動かないようにする */
       touch-action: none;
     }
 
-    /*
-      カード共通設定
-    */
+    /* カード共通設定 */
     .card {
       position: absolute;
 
@@ -62,7 +53,6 @@
       height: 230px;
 
       box-sizing: border-box;
-
       border-radius: 12px;
 
       cursor: pointer;
@@ -80,9 +70,7 @@
       z-index: 5;
     }
 
-    /*
-      カードの裏面
-    */
+    /* カードの裏面 */
     .back {
       background:
         repeating-linear-gradient(
@@ -99,9 +87,7 @@
         0 3px 8px rgba(0, 0, 0, 0.25);
     }
 
-    /*
-      裏面の内側の枠
-    */
+    /* 裏面の内側の枠 */
     .back::after {
       content: "";
 
@@ -116,9 +102,7 @@
       border-radius: 7px;
     }
 
-    /*
-      カードの表面
-    */
+    /* カードの表面 */
     .front {
       background: white;
 
@@ -128,9 +112,7 @@
         0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /*
-      ハート・ダイヤを赤色にする
-    */
+    /* ハート・ダイヤ */
     .red {
       color: red;
     }
@@ -151,7 +133,6 @@
       height: 230px;
 
       box-sizing: border-box;
-
       border-radius: 12px;
 
       background:
@@ -171,9 +152,7 @@
       z-index: 1;
     }
 
-    /*
-      次カードの内側の枠
-    */
+    /* 次カードの内側の枠 */
     .next-card::after {
       content: "";
 
@@ -188,9 +167,7 @@
       border-radius: 7px;
     }
 
-    /*
-      カードを裏返すアニメーション
-    */
+    /* カードを裏返すアニメーション */
     .flip-animation {
       animation: simpleFlip 420ms ease-in-out;
     }
@@ -218,9 +195,7 @@
       }
     }
 
-    /*
-      カードを履歴へ移動
-    */
+    /* カードを履歴へ移動 */
     .move-to-history {
       animation: moveDown 220ms ease-in forwards;
     }
@@ -238,9 +213,7 @@
       }
     }
 
-    /*
-      リセットボタン
-    */
+    /* リセットボタン */
     button {
       margin: 3px;
 
@@ -261,17 +234,11 @@
       transform: scale(0.96);
     }
 
-    /*
-      履歴
-
-      新しいカードが左側、
-      古いカードが右側になる。
-    */
+    /* 履歴 */
     #history {
       display: flex;
 
       justify-content: center;
-
       flex-wrap: wrap;
 
       gap: 5px;
@@ -281,9 +248,7 @@
       max-width: 95%;
     }
 
-    /*
-      履歴カード
-    */
+    /* 履歴カード */
     .history-card {
       width: 36px;
       height: 52px;
@@ -291,7 +256,6 @@
       background: white;
 
       border: 1px solid #ccc;
-
       border-radius: 5px;
 
       display: flex;
@@ -305,9 +269,7 @@
         0 1px 3px rgba(0, 0, 0, 0.15);
     }
 
-    /*
-      バージョン
-    */
+    /* バージョン表示 */
     #version {
       position: fixed;
 
@@ -343,7 +305,7 @@
   <div id="history"></div>
 
   <!-- バージョン -->
-  <div id="version">v1.9</div>
+  <div id="version">v2.0</div>
 
 
   <script>
@@ -489,8 +451,8 @@
 
 
       /*
-        次のカードがある場合、
-        真後ろに裏面カードを置く。
+        残り2枚以上の場合だけ、
+        次のカードを真後ろに置く。
       */
       if (deck.length > 1) {
 
@@ -515,13 +477,17 @@
 
 
       /*
-        タップ・ドラッグを処理
+        タップで表にする
       */
       card.addEventListener(
         "click",
         revealCard
       );
 
+
+      /*
+        ドラッグでシャッフルする
+      */
       card.addEventListener(
         "touchstart",
         handleTouchStart,
@@ -550,7 +516,7 @@
 
       /*
         ドラッグした場合は
-        clickとして扱わない
+        タップとして扱わない。
       */
       if (isDragging) {
         return;
@@ -559,7 +525,7 @@
 
       /*
         すでに表なら
-        2回目のタップとして処理
+        2回目のタップ。
       */
       if (revealed) {
 
@@ -575,8 +541,7 @@
       /*
         一番上のカードを取得。
 
-        この時点ではまだ
-        deckから削除しない。
+        まだdeckから削除しない。
       */
       const cardData = deck[0];
 
@@ -650,12 +615,13 @@
 
 
       /*
-        220ms後にカードを確定
+        アニメーション終了後に
+        カードを確定
       */
       setTimeout(() => {
 
         /*
-          カードをデッキから削除
+          一番上のカードを削除
         */
         const drawnCard =
           deck.shift();
@@ -674,7 +640,7 @@
 
 
         /*
-          まだカードが残っている
+          まだカードが残っている場合
         */
         if (deck.length > 0) {
 
@@ -683,10 +649,7 @@
         } else {
 
           /*
-            52枚すべてなくなった場合
-
-            カードエリアには
-            完全にカードを表示しない。
+            すべて引き終わった場合
           */
           document.getElementById(
             "cardArea"
@@ -694,6 +657,7 @@
             "<p>すべてのカードを引きました</p>";
 
           currentCard = null;
+
           revealed = false;
         }
 
@@ -726,10 +690,6 @@
 
       /*
         新しいカードを一番前に追加
-
-        新しい
-        ↓
-        古い
       */
       history.insertBefore(
         historyCard,
@@ -758,18 +718,24 @@
     function handleTouchStart(event) {
 
       /*
-        カードが存在しない場合は何もしない
+        残り2枚未満なら
+        ドラッグを受け付けない。
+
+        つまり
+        ・残り1枚 → シャッフル不可
+        ・残り0枚 → シャッフル不可
       */
-      if (!currentCard) {
+      if (deck.length < 2) {
+
         return;
       }
 
 
       /*
-        すべて引き終わった場合も
-        何もしない
+        現在のカードがない場合
       */
-      if (deck.length === 0) {
+      if (!currentCard) {
+
         return;
       }
 
@@ -795,18 +761,20 @@
     function handleTouchEnd(event) {
 
       /*
-        カードがない場合は終了
+        残り2枚未満なら
+        何もしない。
       */
-      if (!currentCard) {
+      if (deck.length < 2) {
+
         return;
       }
 
 
       /*
-        すべて引き終わっている場合は
-        シャッフルしない。
+        カードがない場合
       */
-      if (deck.length === 0) {
+      if (!currentCard) {
+
         return;
       }
 
@@ -823,7 +791,7 @@
 
 
       /*
-        横方向・縦方向の移動距離
+        移動距離
       */
       const diffX =
         endX - dragStartX;
@@ -833,9 +801,8 @@
 
 
       /*
-        どちらかの方向に
-        20px以上動かしたら
-        ドラッグと判断する。
+        横または縦に20px以上動かしたら
+        ドラッグと判定する。
       */
       if (
         Math.abs(diffX) >= 20 ||
@@ -846,7 +813,8 @@
 
 
         /*
-          シャッフル
+          残り2枚以上なら
+          シャッフルする。
         */
         shuffleDeck();
       }
@@ -854,7 +822,7 @@
 
       /*
         少し待ってから
-        タップ判定を通常に戻す
+        タップ判定を戻す
       */
       setTimeout(() => {
 
@@ -870,10 +838,12 @@
     function shuffleDeck() {
 
       /*
-        カードがない場合は
-        絶対にシャッフルしない。
+        念のため、
+        残り2枚未満なら
+        シャッフル処理そのものを中止する。
       */
-      if (deck.length === 0) {
+      if (deck.length < 2) {
+
         return;
       }
 
@@ -897,7 +867,7 @@
 
 
       /*
-        3枚のカードを作る
+        3枚のカードを重ねる
       */
       for (let i = 0; i < 3; i++) {
 
@@ -916,7 +886,7 @@
 
 
       /*
-        左右に動かす
+        左に動かす
       */
       cards[0].animate(
         [
@@ -940,6 +910,9 @@
       );
 
 
+      /*
+        右に動かす
+      */
       cards[1].animate(
         [
           {
@@ -962,6 +935,9 @@
       );
 
 
+      /*
+        少し上に動かす
+      */
       cards[2].animate(
         [
           {
@@ -985,7 +961,7 @@
 
 
       /*
-        演出終了
+        シャッフル演出終了
       */
       setTimeout(() => {
 
@@ -995,11 +971,8 @@
 
 
         /*
-          表になっているカードは
-          そのまま残す。
-
-          裏面の場合は
-          新しいデッキ順のカードにする。
+          表になっていない場合は
+          新しい順番の裏面カードを表示。
         */
         if (!revealed) {
 
@@ -1016,7 +989,7 @@
     function resetGame() {
 
       /*
-        52枚を作る
+        52枚作成
       */
       deck = createDeck();
 
@@ -1044,13 +1017,13 @@
 
 
       /*
-        残り枚数を52枚に戻す
+        残り枚数を52に戻す
       */
       updateCount();
 
 
       /*
-        新しい裏面カード
+        新しい裏面カードを表示
       */
       showBackCard();
     }
