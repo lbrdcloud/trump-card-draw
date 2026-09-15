@@ -3,20 +3,19 @@
 <head>
   <meta charset="UTF-8">
 
-  <!-- スマホ画面に合わせる -->
+  <!-- スマホでも見やすくする設定 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>トランプカード</title>
+  <title>トランプカードドロー</title>
 
   <style>
-
     /* ページ全体 */
     body {
-      margin: 0;
-      padding: 20px;
       font-family: sans-serif;
       text-align: center;
-      background: #f2f2f2;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
     }
 
     /* タイトル */
@@ -26,219 +25,221 @@
 
     /* 残り枚数 */
     #remaining {
+      font-size: 20px;
       margin-bottom: 20px;
-      font-size: 18px;
     }
 
     /* カードを置く場所 */
     #card-area {
       display: flex;
       justify-content: center;
-      margin-bottom: 20px;
+      align-items: center;
+      min-height: 260px;
     }
 
-    /* トランプ本体 */
+    /* 大きなカード */
     .card {
-      width: 180px;
-      height: 260px;
-      border-radius: 14px;
-      cursor: pointer;
-      user-select: none;
-
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-
+      width: 160px;
+      height: 230px;
+      border-radius: 12px;
       display: flex;
       justify-content: center;
       align-items: center;
-
-      font-size: 70px;
+      font-size: 42px;
       font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
 
-    /*
-      裏面
-
-      ジョーカーなどの特殊文字は使わず、
-      CSSでトランプらしい模様を作る
-    */
+    /* 裏面 */
     .back {
-      background-color: #b00020;
+      background-color: #c62828;
 
+      /* シンプルな模様 */
       background-image:
         repeating-linear-gradient(
           45deg,
-          transparent,
-          transparent 8px,
-          rgba(255,255,255,0.35) 8px,
-          rgba(255,255,255,0.35) 10px
-        ),
-        repeating-linear-gradient(
-          -45deg,
-          transparent,
-          transparent 8px,
-          rgba(255,255,255,0.35) 8px,
-          rgba(255,255,255,0.35) 10px
+          rgba(255,255,255,0.15) 0px,
+          rgba(255,255,255,0.15) 2px,
+          transparent 2px,
+          transparent 8px
         );
 
-      border: 8px solid white;
-      box-sizing: border-box;
+      border: 6px solid white;
+      outline: 3px solid #c62828;
     }
 
     /* 表面 */
     .front {
-      background: white;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-      color: black;
+      background-color: white;
+      border: 2px solid #333;
     }
 
-    /* ハート・ダイヤ */
+    /* ハート・ダイヤを赤色にする */
     .red {
-      color: #d00000;
+      color: red;
     }
 
     /* ボタン */
     button {
       font-size: 18px;
-      padding: 12px 20px;
+      padding: 10px 20px;
       margin: 5px;
-      border: none;
       border-radius: 8px;
+      border: none;
       cursor: pointer;
-    }
-
-    /* シャッフルボタン */
-    #shuffle-button {
-      background: #333;
-      color: white;
-    }
-
-    /* リセットボタン */
-    #reset-button {
-      background: #ddd;
-      color: #111;
     }
 
     /* ボタンを押したとき */
     button:active {
-      transform: scale(0.96);
+      transform: scale(0.97);
     }
 
-    /*
-      引いたカード一覧
-    */
+    /* 履歴エリア */
     #history-area {
-      margin: 30px auto 0;
-      max-width: 500px;
-      text-align: left;
+      margin-top: 30px;
     }
 
-    /* 一覧のタイトル */
-    #history-title {
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 8px;
+    /* 履歴タイトル */
+    #history-area h2 {
+      font-size: 20px;
     }
 
-    /*
-      引いたカードを並べる場所
-    */
+    /* 履歴カードを横並びにする */
     #history {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      justify-content: center;
+      gap: 8px;
     }
 
-    /*
-      引いたカード1枚分
-
-      大きなカードではなく、
-      小さく表示する
-    */
+    /* 小さい履歴カード */
     .history-card {
-      width: 42px;
-      height: 58px;
-
-      background: white;
-      border: 1px solid #ccc;
+      width: 45px;
+      height: 65px;
+      background-color: white;
+      border: 1px solid #333;
       border-radius: 5px;
-
       display: flex;
       justify-content: center;
       align-items: center;
-
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
-
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
     }
 
+    /* 履歴の赤いカード */
+    .history-card.red {
+      color: red;
+    }
+
+    /* シャッフル時の軽いアニメーション */
+    .shuffle-animation {
+      animation: shuffle 0.35s ease;
+    }
+
+    @keyframes shuffle {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      30% {
+        transform: rotate(-5deg) translateX(-5px);
+      }
+
+      60% {
+        transform: rotate(5deg) translateX(5px);
+      }
+
+      100% {
+        transform: rotate(0deg);
+      }
+    }
+
+    /* 画面右下のバージョン番号 */
+    #version {
+      position: fixed;
+      right: 8px;
+      bottom: 5px;
+      font-size: 12px;
+      color: #888;
+    }
   </style>
 </head>
 
-
 <body>
 
-  <h1>トランプカード</h1>
+  <!-- タイトル -->
+  <h1>トランプカードドロー</h1>
 
   <!-- 残り枚数 -->
-  <div id="remaining">
-    残り：52枚
-  </div>
+  <div id="remaining">残り：52枚</div>
 
-  <!-- 現在のカード -->
+  <!-- 大きなカードを表示する場所 -->
   <div id="card-area"></div>
 
-  <!-- ボタン -->
+  <!-- 操作ボタン -->
   <div>
     <button id="shuffle-button">シャッフル</button>
     <button id="reset-button">リセット</button>
   </div>
 
-
-  <!--
-    引いたカードの一覧
-  -->
+  <!-- 引いたカードの履歴 -->
   <div id="history-area">
-
-    <div id="history-title">
-      引いたカード
-    </div>
-
+    <h2>引いたカード</h2>
     <div id="history"></div>
-
   </div>
+
+  <!-- バージョン番号 -->
+  <div id="version">v1.2</div>
 
 
   <script>
 
     /*
-      ========================================
-      ① トランプを作る
-      ========================================
+      ============================
+      トランプのデータ
+      ============================
     */
 
-    // 4種類のマーク
+    // マーク
     const suits = ["♠", "♥", "♦", "♣"];
 
-    // 13種類
+    // 数字・絵札
     const ranks = [
-      "A", "2", "3", "4", "5", "6", "7",
-      "8", "9", "10", "J", "Q", "K"
+      "A",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "J",
+      "Q",
+      "K"
     ];
 
 
     /*
-      52枚のカードを作る
+      ============================
+      トランプ52枚を作る
+      ============================
     */
+
     function createDeck() {
 
       const newDeck = [];
 
-      for (const suit of suits) {
+      // 4種類のマークを順番に処理
+      for (let suit of suits) {
 
-        for (const rank of ranks) {
+        // A〜Kを順番に処理
+        for (let rank of ranks) {
 
+          // 1枚のカードを作る
           newDeck.push({
             suit: suit,
             rank: rank
@@ -252,236 +253,201 @@
 
 
     /*
-      ========================================
-      ② シャッフル
-      ========================================
+      ============================
+      カードをシャッフルする
+      ============================
     */
 
     function shuffleDeck(deck) {
 
-      /*
-        残っているカードの順番だけを
-        ランダムに入れ替える
-      */
+      // Fisher-Yates方式でシャッフル
       for (let i = deck.length - 1; i > 0; i--) {
 
-        const randomIndex =
-          Math.floor(Math.random() * (i + 1));
+        const j = Math.floor(Math.random() * (i + 1));
 
-        [deck[i], deck[randomIndex]] =
-          [deck[randomIndex], deck[i]];
+        // カードを入れ替える
+        [deck[i], deck[j]] = [deck[j], deck[i]];
       }
 
-      return deck;
     }
 
 
     /*
-      ========================================
-      ③ 変数
-      ========================================
+      ============================
+      アプリで使う変数
+      ============================
     */
 
     // 残っているカード
     let deck = [];
 
-    /*
-      現在表示している裏向きカード
-
-      まだ「引いた」ことにはしない
-    */
+    // 現在表示しているカード
     let currentCard = null;
 
-    // 表になっているか
+    // 現在のカードが表になっているか
     let revealed = false;
 
 
     /*
-      ========================================
-      ④ 残り枚数
-      ========================================
+      ============================
+      残り枚数を画面に表示
+      ============================
     */
 
     function updateRemaining() {
 
       document.getElementById("remaining").textContent =
         "残り：" + deck.length + "枚";
+
     }
 
 
     /*
-      ========================================
-      ⑤ 裏向きカードを表示
-      ========================================
+      ============================
+      裏向きカードを表示
+      ============================
     */
 
     function showBackCard() {
 
-      const cardArea =
-        document.getElementById("card-area");
-
+      // カード表示エリアを空にする
+      const cardArea = document.getElementById("card-area");
       cardArea.innerHTML = "";
 
-      /*
-        重要！
-
-        ここではカードをdeckから取り出さない。
-
-        つまり「シャッフル」しても
-        枚数は減らない。
-      */
-
+      // 山札の一番上のカードを「現在のカード」にする
       currentCard = deck[0];
 
+      // まだ表になっていない
       revealed = false;
 
+      // 裏向きカードを作る
+      const cardElement = document.createElement("div");
 
-      /*
-        裏面を作る
-      */
-      const cardElement =
-        document.createElement("div");
+      cardElement.className = "card back";
 
-      cardElement.className =
-        "card back";
+      // カードをタップしたら表にする
+      cardElement.addEventListener("click", handleCardClick);
 
-
-      /*
-        タップしたら表にする
-      */
-      cardElement.addEventListener(
-        "click",
-        revealCard
-      );
-
-
+      // 画面に表示
       cardArea.appendChild(cardElement);
     }
 
 
     /*
-      ========================================
-      ⑥ カードを表にする
-      ========================================
+      ============================
+      カードをタップしたとき
+      ============================
+      
+      1回目：
+      裏 → 表
+      
+      2回目：
+      表 → 履歴へ移動 → 次のカード
     */
 
-    function revealCard() {
+    function handleCardClick() {
 
-      /*
-        すでに表なら何もしない
-      */
-      if (revealed) {
+      // カードが存在しない場合は何もしない
+      if (!currentCard) {
         return;
       }
 
-      revealed = true;
-
 
       /*
-        ここで初めて山札から
-        カードを1枚取り出す。
-
-        つまり、この瞬間に
-        残り枚数が1枚減る。
+        1回目のタップ
+        ↓
+        カードを表にする
       */
-      deck.shift();
 
+      if (!revealed) {
 
-      /*
-        表面を作る
-      */
-      const cardElement =
-        document.createElement("div");
+        revealed = true;
 
-      cardElement.className =
-        "card front";
+        const cardArea = document.getElementById("card-area");
 
+        // 表面のカードを作る
+        const cardElement = document.createElement("div");
 
-      /*
-        ハート・ダイヤは赤
-      */
-      if (
-        currentCard.suit === "♥" ||
-        currentCard.suit === "♦"
-      ) {
-        cardElement.classList.add("red");
+        cardElement.className = "card front";
+
+        // ハート・ダイヤなら赤色
+        if (
+          currentCard.suit === "♥" ||
+          currentCard.suit === "♦"
+        ) {
+          cardElement.classList.add("red");
+        }
+
+        // カードの文字
+        cardElement.textContent =
+          currentCard.suit + " " + currentCard.rank;
+
+        // カード表示を入れ替える
+        cardArea.innerHTML = "";
+
+        cardArea.appendChild(cardElement);
+
+        // もう一度タップできるようにする
+        cardElement.addEventListener("click", handleCardClick);
+
+        return;
       }
 
 
       /*
-        カードを表示
+        2回目のタップ
+        ↓
+        今のカードを確定して履歴へ
       */
-      cardElement.textContent =
-        currentCard.suit +
-        " " +
-        currentCard.rank;
 
+      // 山札から現在のカードを取り除く
+      deck.shift();
 
-      /*
-        表示
-      */
-      const cardArea =
-        document.getElementById("card-area");
-
-      cardArea.innerHTML = "";
-
-      cardArea.appendChild(cardElement);
-
-
-      /*
-        引いたカードを一覧に追加
-      */
+      // 履歴に追加
       addToHistory(currentCard);
 
-
-      /*
-        残り枚数を更新
-      */
+      // 残り枚数を更新
       updateRemaining();
 
 
       /*
-        まだカードが残っていれば、
-        次のカードを裏向きで用意する。
-
-        ただし、すぐに表にはしない。
+        まだカードが残っている場合
+        ↓
+        次の裏向きカードを表示
       */
+
       if (deck.length > 0) {
 
-        setTimeout(function() {
-          showBackCard();
-        }, 300);
+        showBackCard();
 
       } else {
 
+        // 52枚すべて引き終わった場合
         currentCard = null;
 
+        document.getElementById("card-area").innerHTML =
+          "<p>すべてのカードを引きました！</p>";
       }
+
     }
 
 
     /*
-      ========================================
-      ⑦ 引いたカード一覧に追加
-      ========================================
+      ============================
+      引いたカードを履歴に追加
+      ============================
     */
 
     function addToHistory(card) {
 
-      const history =
-        document.getElementById("history");
+      const history = document.getElementById("history");
 
+      // 小さいカードを作る
+      const historyCard = document.createElement("div");
 
-      const historyCard =
-        document.createElement("div");
+      historyCard.className = "history-card";
 
-      historyCard.className =
-        "history-card";
-
-
-      /*
-        ハート・ダイヤは赤
-      */
+      // ハート・ダイヤは赤色
       if (
         card.suit === "♥" ||
         card.suit === "♦"
@@ -489,116 +455,108 @@
         historyCard.classList.add("red");
       }
 
-
-      /*
-        小さいカードとして表示
-      */
+      // カードの文字
       historyCard.textContent =
         card.suit + card.rank;
 
-
-      /*
-        一覧の最後に追加
-      */
+      // 履歴の最後に追加
       history.appendChild(historyCard);
+
     }
 
 
     /*
-      ========================================
-      ⑧ シャッフルボタン
-      ========================================
+      ============================
+      シャッフルボタン
+      ============================
+      
+      ポイント：
+      カードを引かない。
+      そのため残り枚数は減らない。
     */
 
     document
       .getElementById("shuffle-button")
       .addEventListener("click", function() {
 
-        /*
-          残りのカードだけをシャッフル。
-
-          ここではカードを引かないので、
-          残り枚数は変わらない。
-        */
+        // 残っているカードだけをシャッフル
         shuffleDeck(deck);
 
-
         /*
-          新しく裏向きカードを表示
+          裏向きカードが表示されているときは、
+          シャッフル後の一番上のカードに変更する。
         */
-        if (deck.length > 0) {
+
+        if (!revealed && deck.length > 0) {
+
           showBackCard();
+
+          // 軽いアニメーションを付ける
+          const card = document.querySelector(".card");
+
+          if (card) {
+            card.classList.add("shuffle-animation");
+          }
+
         }
 
-      });
+        // 表向きのカードが表示中なら、
+        // そのカードはそのまま残す。
+        // シャッフルするのは残りの山札だけ。
 
-
-    /*
-      ========================================
-      ⑨ リセットボタン
-      ========================================
-    */
-
-    document
-      .getElementById("reset-button")
-      .addEventListener("click", function() {
-
-        /*
-          52枚に戻す
-        */
-        deck = createDeck();
-
-
-        /*
-          52枚をシャッフル
-        */
-        shuffleDeck(deck);
-
-
-        /*
-          引いたカード一覧を空にする
-        */
-        document.getElementById("history").innerHTML = "";
-
-
-        /*
-          新しい裏向きカードを表示
-        */
-        showBackCard();
-
-
-        /*
-          残り枚数を52枚にする
-        */
         updateRemaining();
 
       });
 
 
     /*
-      ========================================
-      ⑩ ページを開いたとき
-      ========================================
+      ============================
+      リセットボタン
+      ============================
     */
 
+    document
+      .getElementById("reset-button")
+      .addEventListener("click", function() {
+
+        // 52枚の新しいデッキを作る
+        deck = createDeck();
+
+        // シャッフル
+        shuffleDeck(deck);
+
+        // 現在のカードをリセット
+        currentCard = null;
+        revealed = false;
+
+        // 履歴を消す
+        document.getElementById("history").innerHTML = "";
+
+        // 残り枚数を更新
+        updateRemaining();
+
+        // 新しい裏向きカードを表示
+        showBackCard();
+
+      });
+
+
     /*
-      52枚を作る
+      ============================
+      アプリ開始時の処理
+      ============================
     */
+
+    // 52枚のデッキを作る
     deck = createDeck();
 
-
-    /*
-      最初にシャッフル
-    */
+    // 最初にシャッフル
     shuffleDeck(deck);
 
+    // 残り枚数を表示
+    updateRemaining();
 
-    /*
-      最初のカードを裏向きで表示
-
-      ここではまだカードを引いていないので
-      残り枚数は52枚のまま。
-    */
+    // 最初の裏向きカードを表示
     showBackCard();
 
   </script>
